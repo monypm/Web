@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Canvas Tutorial</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <style type="text/css">
+        canvas {
+            border: 1px solid black;
+            background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Fingerprint_picture.svg/414px-Fingerprint_picture.svg.png");
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+    </style>
+</head>
+
+<body onload="draw()">
+    <div id="images"></div>
+    <canvas style="margin:0;padding:0;position:relative;left:50px;top:50px;" id="imgCanvas" width="400" height="400" onclick="draw(event)">
+        <script>
+            var canvas = document.getElementById("imgCanvas");
+            var context = canvas.getContext("2d");
+            var isAngle = false;
+
+            var circles = [];
+
+            function createImageOnCanvas(imageId) {
+                canvas.style.display = "block";
+
+                document.getElementById("images").style.overflowY = "hidden";
+                var img = new Image(5, 5);
+                img.src = document.getElementById(imageId).src;
+                context.drawImage(img, (0), (0));
+            }
+            var posx;
+            var posy;
+            var linex;
+            var liney;
+            var uVect;
+            var newObject = {x1:0, y1:0, x2:0, y2:0};
+
+            function draw(e) {
+                var pos = getMousePos(canvas, e);
+                if (!isAngle) {
+                    newObject.x1 = pos.x;
+                    newObject.y1 = pos.y;
+                    newObject.x2 = pos.x;
+                    newObject.y2 = pos.y;
+                    circles.push(newObject);
+
+                    posx = pos.x;
+                    posy = pos.y;
+                    
+                    context.fillStyle = 'rgba(255,0,0,0.1)';
+                    context.strokeStyle = 'rgba(255,0,0,1)';
+                    context.lineWidth = 3;
+                    context.beginPath();
+                    context.arc(pos.x, pos.y, 6, 0, 2 * Math.PI);
+                    context.fill();
+                    context.stroke();
+                    isAngle = true;
+                }
+                else{
+                    uVect = {x:pos.x - posx, y:pos.y - posy};
+                    var vectNormal = Math.sqrt( Math.pow(uVect.x, 2) + Math.pow(uVect.y, 2));
+                    uVect.x /= vectNormal;
+                    uVect.y /= vectNormal;
+
+                    context.moveTo(posx, posy);
+                    
+                    
+                    context.fillStyle = 'rgba(255,0,0,0.1)';
+                    context.strokeStyle = 'rgba(255,0,0,1)';
+                    
+                    context.lineWidth = 3;
+                    context.lineTo(posx + uVect.x*15, posy + uVect.y*15);
+                    context.stroke();
+                    isAngle = false;
+                }
+
+            }
+
+            
+            
+            function getMousePos(canvas, evt) {
+                var rect = canvas.getBoundingClientRect();
+                return {
+                    x: evt.clientX - rect.left,
+                    y: evt.clientY - rect.top
+                };
+            }
+
+            window.draw = draw;
+        </script>
+    </canvas>
+
+</body>
+
+</html>
