@@ -36,31 +36,66 @@
             }
             var posx;
             var posy;
-            var linex;
-            var liney;
             var uVect;
+            var erased = false;
             var newObject = {x1:0, y1:0, x2:0, y2:0};
 
             function draw(e) {
+                
+                context.fillStyle = 'rgba(255,0,0,0.1)';
+                context.strokeStyle = 'rgba(255,0,0,1)';
+                context.lineWidth = 3;
+
                 var pos = getMousePos(canvas, e);
                 if (!isAngle) {
-                    newObject.x1 = pos.x;
-                    newObject.y1 = pos.y;
-                    newObject.x2 = pos.x;
-                    newObject.y2 = pos.y;
-                    circles.push(newObject);
 
-                    posx = pos.x;
-                    posy = pos.y;
-                    
-                    context.fillStyle = 'rgba(255,0,0,0.1)';
-                    context.strokeStyle = 'rgba(255,0,0,1)';
-                    context.lineWidth = 3;
-                    context.beginPath();
-                    context.arc(pos.x, pos.y, 6, 0, 2 * Math.PI);
-                    context.fill();
-                    context.stroke();
-                    isAngle = true;
+                    console.log(circles);
+                    for(var i = 0; i < circles.length; i++){
+                        console.log(Math.sqrt(Math.pow(circles[i].x1 - pos.x, 2) + Math.pow(circles[i].y1 - pos.y, 2)));    
+                        if(Math.sqrt(Math.pow(circles[i].x1 - pos.x, 2) + Math.pow(circles[i].y1 - pos.y, 2)) <= 6){
+                            
+                            circles.splice(i, 1);
+                            console.log(circles.length);
+                            erased = true;
+                            break;
+                        }
+                    }
+
+                    if(!erased){
+                        console.log("Not erased");
+                        newObject = {x1:0, y1:0, x2:0, y2:0};
+                        newObject.x1 = pos.x;
+                        newObject.y1 = pos.y;
+                        newObject.x2 = pos.x;
+                        newObject.y2 = pos.y;
+                        circles.push(newObject);
+
+                        context.beginPath();
+                        context.arc(pos.x, pos.y, 6, 0, 2 * Math.PI);
+                        context.fill();
+                        context.stroke();
+
+                        posx = pos.x;
+                        posy = pos.y;
+
+                        isAngle = true; 
+                    }
+                    else{
+                        console.log(circles.length);
+                        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+                        circles.forEach((circle) => {
+                            context.beginPath();
+                            context.arc(circle.x1, circle.y1, 6, 0, 2 * Math.PI);
+                            context.fill();
+                            context.stroke();
+
+                            context.moveTo(circle.x1, circle.y1);
+
+                            context.lineTo(circle.x2, circle.y2);
+                            context.stroke();
+                        });
+                        erased = false;
+                    }
                 }
                 else{
                     uVect = {x:pos.x - posx, y:pos.y - posy};
@@ -68,21 +103,18 @@
                     uVect.x /= vectNormal;
                     uVect.y /= vectNormal;
 
+                    circles[circles.length - 1].x2 = posx + uVect.x*15;
+                    circles[circles.length - 1].y2 = posy + uVect.y*15;
+
                     context.moveTo(posx, posy);
-                    
-                    
-                    context.fillStyle = 'rgba(255,0,0,0.1)';
-                    context.strokeStyle = 'rgba(255,0,0,1)';
-                    
-                    context.lineWidth = 3;
+
                     context.lineTo(posx + uVect.x*15, posy + uVect.y*15);
                     context.stroke();
+                    
                     isAngle = false;
                 }
 
             }
-
-            
             
             function getMousePos(canvas, evt) {
                 var rect = canvas.getBoundingClientRect();
