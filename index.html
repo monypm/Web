@@ -18,7 +18,8 @@
 
 <body onload="draw()">
     <div id="images"></div>
-    <canvas style="margin:0;padding:0;position:relative;left:50px;top:50px;" id="imgCanvas" width="400" height="400" onclick="draw(event)">
+    <canvas oncontextmenu="return false;" style="margin:0;padding:0;position:relative;left:50px;top:50px;" id="imgCanvas" width="400" height="400"
+        onclick="draw(event)">
         <script>
             var canvas = document.getElementById("imgCanvas");
             var context = canvas.getContext("2d");
@@ -38,50 +39,27 @@
             var posy;
             var uVect;
             var erased = false;
-            var newObject = {x1:0, y1:0, x2:0, y2:0};
+            var newObject = { x1: 0, y1: 0, x2: 0, y2: 0 };
 
-            function draw(e) {
-                
-                context.fillStyle = 'rgba(255,0,0,0.1)';
-                context.strokeStyle = 'rgba(255,0,0,1)';
-                context.lineWidth = 3;
+            $('canvas').mousedown(function (e) {
 
-                var pos = getMousePos(canvas, e);
                 if (!isAngle) {
+                    if (e.which === 3) {
 
-                    console.log(circles);
-                    for(var i = 0; i < circles.length; i++){
-                        console.log(Math.sqrt(Math.pow(circles[i].x1 - pos.x, 2) + Math.pow(circles[i].y1 - pos.y, 2)));    
-                        if(Math.sqrt(Math.pow(circles[i].x1 - pos.x, 2) + Math.pow(circles[i].y1 - pos.y, 2)) <= 6){
-                            
-                            circles.splice(i, 1);
-                            console.log(circles.length);
-                            erased = true;
-                            break;
+                        var pos = getMousePos(canvas, e);
+                        for (var i = 0; i < circles.length; i++) {
+                            console.log(Math.sqrt(Math.pow(circles[i].x1 - pos.x, 2) + Math.pow(circles[i].y1 - pos.y, 2)));
+                            if (Math.sqrt(Math.pow(circles[i].x1 - pos.x, 2) + Math.pow(circles[i].y1 - pos.y, 2)) <= 6) {
+
+                                circles.splice(i, 1);
+                                console.log(circles.length);
+                                erased = true;
+                                break;
+                            }
                         }
                     }
 
-                    if(!erased){
-                        console.log("Not erased");
-                        newObject = {x1:0, y1:0, x2:0, y2:0};
-                        newObject.x1 = pos.x;
-                        newObject.y1 = pos.y;
-                        newObject.x2 = pos.x;
-                        newObject.y2 = pos.y;
-                        circles.push(newObject);
-
-                        context.beginPath();
-                        context.arc(pos.x, pos.y, 6, 0, 2 * Math.PI);
-                        context.fill();
-                        context.stroke();
-
-                        posx = pos.x;
-                        posy = pos.y;
-
-                        isAngle = true; 
-                    }
-                    else{
-                        console.log(circles.length);
+                    if (erased) {
                         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
                         circles.forEach((circle) => {
                             context.beginPath();
@@ -97,25 +75,56 @@
                         erased = false;
                     }
                 }
-                else{
-                    uVect = {x:pos.x - posx, y:pos.y - posy};
-                    var vectNormal = Math.sqrt( Math.pow(uVect.x, 2) + Math.pow(uVect.y, 2));
+
+
+            });
+
+            function draw(e) {
+
+                context.fillStyle = 'rgba(255,0,0,0.1)';
+                context.strokeStyle = 'rgba(255,0,0,1)';
+                context.lineWidth = 3;
+
+                var pos = getMousePos(canvas, e);
+                if (!isAngle) {
+
+                    newObject = { x1: 0, y1: 0, x2: 0, y2: 0 };
+                    newObject.x1 = pos.x;
+                    newObject.y1 = pos.y;
+                    newObject.x2 = pos.x;
+                    newObject.y2 = pos.y;
+                    circles.push(newObject);
+
+                    context.beginPath();
+                    context.arc(pos.x, pos.y, 6, 0, 2 * Math.PI);
+                    context.fill();
+                    context.stroke();
+
+                    posx = pos.x;
+                    posy = pos.y;
+
+                    isAngle = true;
+
+                }
+                else {
+                    uVect = { x: pos.x - posx, y: pos.y - posy };
+                    var vectNormal = Math.sqrt(Math.pow(uVect.x, 2) + Math.pow(uVect.y, 2));
                     uVect.x /= vectNormal;
                     uVect.y /= vectNormal;
 
-                    circles[circles.length - 1].x2 = posx + uVect.x*15;
-                    circles[circles.length - 1].y2 = posy + uVect.y*15;
+                    circles[circles.length - 1].x2 = posx + uVect.x * 15;
+                    circles[circles.length - 1].y2 = posy + uVect.y * 15;
 
                     context.moveTo(posx, posy);
 
-                    context.lineTo(posx + uVect.x*15, posy + uVect.y*15);
+                    context.lineTo(posx + uVect.x * 15, posy + uVect.y * 15);
                     context.stroke();
-                    
+
                     isAngle = false;
                 }
 
             }
-            
+
             function getMousePos(canvas, evt) {
                 var rect = canvas.getBoundingClientRect();
                 return {
